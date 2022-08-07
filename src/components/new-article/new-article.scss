@@ -1,0 +1,67 @@
+.text-area {
+  height: 200px;
+}
+
+.form__tags-input {
+  width: 300px;
+  margin-right: 18px;
+}
+
+.tags__label {
+  display: flex;
+}
+
+.tags__button {
+  width: 118px;
+  height: 44px;
+  border: 1px solid #F5222D;
+  border-radius: 4px;
+  background-color: white;
+  color: #F5222D;
+  transition: color 1s, background-color 1s;
+
+  &:hover {
+    cursor: pointer;
+    background-color: #F5222D;
+    color: white;
+  }
+}
+
+
+.form__add-tags {
+  display: flex;
+
+  .tags__button:not(:last-child) {
+    margin-right: 18px;
+  }
+
+  .add-tag {
+    border: 1px solid #1890FF;
+    border-radius: 4px;
+    color: #1890FF;
+
+    &:hover {
+      cursor: pointer;
+      color: white;
+      background-color: #1890FF;
+    }
+  }
+}
+
+.article__title {
+  text-align: center;
+  margin-top: 35px;
+  margin-bottom: 21px;
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+
+  color: #262626;
+}
+
+.new-article {
+  margin: 10px 0 35px;
+}
+

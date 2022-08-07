@@ -1,0 +1,33 @@
+.footer__btn {
+  min-width: 110px;
+  height: 51px;
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 28px;
+  background-color: transparent;
+  border: none;
+
+  color: rgba(0, 0, 0, 0.85);
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &:not(:last-child) {
+    margin-right: 10px;
+  }
+}
+
+.active--btn {
+  border: 1px solid #52C41A;
+  border-radius: 5px;
+
+  font-family: 'Inter',sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 28px;
+  color: #52C41A;
+}
