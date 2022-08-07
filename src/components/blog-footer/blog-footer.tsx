@@ -26,6 +26,7 @@ const AuthHeader: React.FC = () => {
   const logOutHandle = () => {
     removeCookie('token');
     dispatch(setAuthUser(false));
+    dispatch(setUserData(null));
   };
 
   useEffect(() => {
