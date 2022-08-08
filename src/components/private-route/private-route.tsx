@@ -1,12 +1,10 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-
-import { useAppSelector } from '../../hook/hooks';
+import { useCookies } from 'react-cookie';
 
 const PrivateRoute = ({ children }) => {
-  const isAuth = useAppSelector((state) => state.auth.isAuth);
-
-  if (!isAuth) {
+  const [cookies] = useCookies(['token']);
+  if (!cookies.token) {
     return <Navigate to={'/sign-in'} />;
   }
   return children;

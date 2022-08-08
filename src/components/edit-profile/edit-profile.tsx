@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as yup from 'yup';
 import '../newAccountRegister/newAccountRegister.scss';
 import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
 
-import { useAppSelector } from '../../hook/hooks';
+import { useAppDispatch, useAppSelector } from '../../hook/hooks';
+import { getArticles, setUserData } from '../../store/articlesSlice';
+import hide from '../newAccountRegister/hidden.png';
+import view from '../newAccountRegister/view.png';
 
 interface IFormInputEdit {
   username?: string;
@@ -22,17 +26,18 @@ const schema = yup
       .max(20, 'Username needs to be at max 20 characters')
       .required('Should not be empty'),
     email: yup.string().email('Email should be a valid!'),
-    password: yup
-      .string()
-      .min(6, 'Your password needs to be at least 6 characters.')
-      .max(40, 'Your password needs to be at max 40 characters.'),
+    password: yup.string(),
     image: yup.string(),
   })
   .required();
 
 const EditProfile = () => {
-  const { isAuth, authUser } = useAppSelector((state) => state.auth);
+  const { authUser } = useAppSelector((state) => state.auth);
   const [cookies] = useCookies(['token']);
+  const dispatch = useAppDispatch();
+  const pagiPage = useAppSelector((state) => state.article.page);
+  const [toggleVision, setToggleVision] = useState(false);
+  const nav = useNavigate();
   const {
     register,
     handleSubmit,
@@ -53,7 +58,17 @@ const EditProfile = () => {
         Authorization: `Bearer ${cookies.token}`,
       },
       body: JSON.stringify({ user: resp }),
-    });
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((request) => {
+        dispatch(setUserData(request));
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        dispatch(getArticles([pagiPage, cookies.token]));
+        nav('/');
+      });
   };
   return (
     <div className={'form__wrapper'}>
@@ -78,12 +93,19 @@ const EditProfile = () => {
           />
           {errors?.email ? <p className={'error__text'}>{errors.email.message}</p> : null}
         </label>
-        <label htmlFor="password">
+        <label className={'show-hide-password'} htmlFor="password">
+          <img
+            className={'show-pass'}
+            src={!toggleVision ? hide : view}
+            alt="password show"
+            onClick={() => setToggleVision((toggle) => !toggle)}
+          />
           New Password
           <input
             className={errors?.password ? 'failed-validation-input' : 'form__input'}
-            {...register('password')}
+            {...register('password', { required: false })}
             placeholder={'Password'}
+            type={!toggleVision ? 'password' : ''}
           />
           {errors?.password ? <p className={'error__text'}>{errors.password.message}</p> : null}
         </label>

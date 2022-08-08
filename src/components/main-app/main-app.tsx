@@ -17,16 +17,16 @@ import NewArticle from '../new-article/new-article';
 
 const MainApp: React.FC = () => {
   const dispatch = useAppDispatch();
-  const article = useAppSelector((state) => state.article.singleArticle);
-
-  const [cookies, setCookies] = useCookies(['token']);
+  const pagiPage = useAppSelector((state) => state.article.page);
+  const [cookies] = useCookies(['token']);
+  console.log('his');
 
   useEffect(() => {
     if (cookies.token) dispatch(setAuthUser(true));
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    dispatch(getArticles(0));
-  }, [dispatch, cookies]);
+    dispatch(getArticles([pagiPage, cookies.token]));
+  }, [dispatch, cookies, pagiPage]);
 
   return (
     <div className={'main'}>

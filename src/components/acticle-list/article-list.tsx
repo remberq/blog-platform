@@ -14,9 +14,9 @@ const ArticleList: React.FC = () => {
     const [article] = articles.filter((item) => {
       return item.slug === slug;
     });
-    console.log(article);
     dispatch(addSingleArticle({ article }));
   };
+  console.log('not hi');
   return (
     <>
       <ul className={'article__wrapper'}>

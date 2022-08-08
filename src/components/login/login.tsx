@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as yup from 'yup';
@@ -6,8 +6,10 @@ import '../newAccountRegister/newAccountRegister.scss';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 
-import { useAppDispatch } from '../../hook/hooks';
+import { useAppDispatch, useAppSelector } from '../../hook/hooks';
 import { setAuthUser } from '../../store/articlesSlice';
+import hide from '../newAccountRegister/hidden.png';
+import view from '../newAccountRegister/view.png';
 
 interface IFormInputSignIn {
   email: string;
@@ -27,6 +29,8 @@ const schema = yup
 
 const Login = () => {
   const [cookies, setCookies] = useCookies(['token']);
+  const [toggleVision, setToggleVision] = useState(false);
+  const { isAuth } = useAppSelector((state) => state.auth);
   const nav = useNavigate();
   const dispatch = useAppDispatch();
   const {
@@ -34,7 +38,9 @@ const Login = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<IFormInputSignIn>({ resolver: yupResolver(schema) });
-
+  useEffect(() => {
+    if (isAuth) nav('/');
+  }, [nav, isAuth]);
   const onSubmitLogin = (data) => {
     fetch('https://blog.kata.academy/api/users/login', {
       method: 'POST',
@@ -56,7 +62,7 @@ const Login = () => {
         nav('/profile');
       });
   };
-  // const onSubmit: SubmitHandler<IFormInputSignIn> = (data) => console.log(data);
+
   return (
     <div className={'form__wrapper'}>
       <p className={'form__heading'}>Sign In</p>
@@ -71,12 +77,19 @@ const Login = () => {
           />
           {errors?.email ? <p className={'error__text'}>{errors.email.message}</p> : null}
         </label>
-        <label htmlFor="password">
+        <label className={'show-hide-password'} htmlFor="password">
+          <img
+            className={'show-pass'}
+            src={!toggleVision ? hide : view}
+            alt="password show"
+            onClick={() => setToggleVision((toggle) => !toggle)}
+          />
           Password
           <input
             className={errors?.password ? 'failed-validation-input' : 'form__input'}
             {...register('password')}
             placeholder={'Password'}
+            type={!toggleVision ? 'password' : ''}
           />
           {errors?.password ? <p className={'error__text'}>{errors.password.message}</p> : null}
         </label>

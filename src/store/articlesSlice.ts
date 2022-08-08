@@ -34,8 +34,13 @@ export const getArticles = createAsyncThunk('article/getArticles', async functio
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   try {
-    console.log('hii');
-    const response = await fetch(`https://blog.kata.academy/api/articles?limit=6&offset=${arg}`);
+    const indexOffset = arg[0] - 1;
+    const offset = [0, 6, 12, 18, 24];
+    const response = await fetch(`https://blog.kata.academy/api/articles?limit=6&offset=${offset[indexOffset]}`, {
+      headers: {
+        Authorization: `Bearer ${arg[1]}`,
+      },
+    });
     if (!response.ok) {
       throw new Error('Oh Hi Mark!');
     }
@@ -73,7 +78,7 @@ export const articleSlice = createSlice({
 
 interface IUser {
   email: string;
-  token: string;
+  token: null;
   username: string;
   bio?: string;
   image?: string;
@@ -95,7 +100,7 @@ export const authSlice = createSlice({
       state.isAuth = action.payload;
     },
     setUserData: (state, action) => {
-      state.authUser = action.payload.user;
+      state.authUser = { ...action.payload.user, token: null };
     },
     clearUserData: (state) => {
       state.authUser = null;

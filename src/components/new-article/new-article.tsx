@@ -25,7 +25,7 @@ const schema = yup
     description: yup
       .string()
       .min(3, 'Short description needs to be at least 3 characters')
-      .max(40, 'Short description needs to be at max 20 characters')
+      .max(40, 'Short description needs to be at max 40 characters')
       .required(),
     body: yup.string().required('Text should not be empty!'),
   })
@@ -41,6 +41,7 @@ interface IEditArticle {
 const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
   const article = useAppSelector((state) => state.article.singleArticle);
   const [tags, setTags] = useState<TTags>(isEdit ? article.tagList : []);
+  const pagiPage = useAppSelector((state) => state.article.page);
   const [value, setValue] = useState<TValue>('');
   const [tagError, setTagError] = useState(false);
   const [cookies] = useCookies(['token']);
@@ -81,7 +82,9 @@ const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
       },
       body: JSON.stringify(newArticle),
     }).then(() => {
-      dispatch(getArticles());
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      dispatch(getArticles([pagiPage, cookies.token]));
       nav('/');
     });
   };

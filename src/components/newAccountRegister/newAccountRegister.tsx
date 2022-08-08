@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import './newAccountRegister.scss';
 import { Link, useNavigate } from 'react-router-dom';
+
+import hide from './hidden.png';
+import view from './view.png';
 
 interface IFormInput {
   username: string;
@@ -35,19 +38,31 @@ const schema = yup
   .required();
 
 const NewAccountRegister = () => {
+  const [passVision, setPassVision] = useState(false);
+  const [repeatVision, setRepeatVision] = useState(false);
   const nav = useNavigate();
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<IFormInput>({ resolver: yupResolver(schema) });
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
-    console.log(data);
+    const { username, password, email } = data;
+    fetch('https://blog.kata.academy/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user: {
+          username,
+          password,
+          email,
+        },
+      }),
+    });
     nav('/profile');
   };
-
-  console.log(watch('username')); // watch input value by passing the name of it
 
   return (
     /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
@@ -72,21 +87,35 @@ const NewAccountRegister = () => {
           />
           {errors?.email ? <p className={'error__text'}>{errors.email.message}</p> : null}
         </label>
-        <label htmlFor="password">
+        <label className={'show-hide-password'} htmlFor="password">
+          <img
+            className={'show-pass'}
+            src={!passVision ? hide : view}
+            alt="password show"
+            onClick={() => setPassVision((toggle) => !toggle)}
+          />
           Password
           <input
             className={errors?.password ? 'failed-validation-input' : 'form__input'}
             {...register('password')}
             placeholder={'Password'}
+            type={!passVision ? 'password' : ''}
           />
           {errors?.password ? <p className={'error__text'}>{errors.password.message}</p> : null}
         </label>
-        <label htmlFor="repeat">
+        <label className={'show-hide-password'} htmlFor="repeat">
+          <img
+            className={'show-pass'}
+            src={!repeatVision ? hide : view}
+            alt="password show"
+            onClick={() => setRepeatVision((toggle) => !toggle)}
+          />
           Repeat Password
           <input
             className={errors?.repeat ? 'failed-validation-input' : 'form__input'}
             {...register('repeat')}
             placeholder={'Repeat Password'}
+            type={!repeatVision ? 'password' : ''}
           />
           {errors?.repeat ? <p className={'error__text'}>{errors.repeat.message}</p> : null}
         </label>

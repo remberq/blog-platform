@@ -15,6 +15,10 @@ input {
   outline: none;
 }
 
+.form__input {
+  padding-right: 40px;
+}
+
 .form__input:focus {
   outline: 1.5px solid black;
 }
@@ -42,6 +46,8 @@ input {
 
 .form__main {
   padding: 21px 32px 48px;
+  display: flex;
+  flex-direction: column;
 }
 
 .form__submit-btn {
@@ -112,3 +118,32 @@ input {
 
   color: #F5222D;
 }
+
+.show-hide-password {
+  position: relative;
+
+  .show-pass {
+    padding: 5px;
+    position: absolute;
+    top: 38%;
+    right: 10px;
+
+
+    &:hover {
+      outline: 1px solid rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    &:active {
+      transform: matrix3d(0.8,0,0.00,0,0.00,0.8,0.00,0,0,0,1,0,0,0,0,1);
+      transform-origin: center center 0;
+      transition: all 0.2s ease 0s;
+      -webkit-transform-origin: center center 0;
+      -webkit-transition: all 0.2s ease 0s;
+      background-color: rgba(227, 224, 224, 0.5);
+    }
+  }
+}
+
+

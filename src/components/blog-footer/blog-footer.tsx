@@ -6,6 +6,8 @@ import { useCookies } from 'react-cookie';
 import { useAppDispatch, useAppSelector } from '../../hook/hooks';
 import { setAuthUser, setUserData } from '../../store/articlesSlice';
 
+import avatar from './avatar.png';
+
 const UnAuthHeader: React.FC = () => {
   return (
     <div className={'footer__authorization'}>
@@ -29,6 +31,7 @@ const AuthHeader: React.FC = () => {
     dispatch(setUserData(null));
   };
 
+  console.log(authUser);
   useEffect(() => {
     fetch('https://blog.kata.academy/api/user', {
       method: 'GET',
@@ -47,7 +50,7 @@ const AuthHeader: React.FC = () => {
       </Link>
       <Link to={'/profile'} className={'footer__auth-profile'}>
         <span className={'auth__name'}>{authUser?.username}</span>
-        <img className={'auth__img'} src={authUser?.image} alt="avatar" />
+        <img className={'auth__img'} src={authUser?.image || avatar} alt="avatar" />
       </Link>
       <Link to={'/'} onClick={logOutHandle}>
         <button className={'auth__link--logout'}>Log Out</button>
