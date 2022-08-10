@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import './new-article.scss';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import { useCookies } from 'react-cookie';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAppDispatch, useAppSelector } from '../../hook/hooks';
-import { getArticles } from '../../store/articlesSlice';
+import { addSingleArticle, getArticles } from '../../store/articlesSlice';
 
 interface INewArticleInput {
   title: string;
@@ -40,8 +40,8 @@ interface IEditArticle {
 
 const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
   const article = useAppSelector((state) => state.article.singleArticle);
-  const [tags, setTags] = useState<TTags>(isEdit ? article.tagList : []);
   const pagiPage = useAppSelector((state) => state.article.page);
+  const [tags, setTags] = useState<TTags>(isEdit ? article.tagList : []);
   const [value, setValue] = useState<TValue>('');
   const [tagError, setTagError] = useState(false);
   const [cookies] = useCookies(['token']);
@@ -52,7 +52,23 @@ const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
     handleSubmit,
     formState: { errors },
   } = useForm<INewArticleInput>({ resolver: yupResolver(schema) });
+  const { slug } = useParams();
+  useEffect(() => {
+    if (isEdit) {
+      fetch(`https://blog.kata.academy/api/articles/${slug}`)
+        .then((val) => {
+          return val.json();
+        })
+        .then((item) => {
+          console.log(item, 'ITEM');
+          dispatch(addSingleArticle({ article: item.article }));
+        });
+    }
+  }, [dispatch, slug, isEdit]);
 
+  if (isEdit && !Object.keys(article).length) {
+    return <div>loading</div>;
+  }
   // add tags handle
   const addTagHandle = (event) => {
     event.preventDefault();
@@ -65,8 +81,7 @@ const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
     }
   };
   // onFormSubmit
-  const onSubmit: SubmitHandler<INewArticleInput> = (data) => {
-    console.log(data, tags);
+  const onSubmit: SubmitHandler<INewArticleInput> = async (data) => {
     const newArticle = {
       article: {
         ...data,
@@ -74,20 +89,29 @@ const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
       },
     };
     const editParams = isEdit ? `articles/${article.slug}` : 'articles';
-    fetch(`https://blog.kata.academy/api/${editParams}`, {
-      method: isEdit ? 'PUT' : 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${cookies.token}`,
-      },
-      body: JSON.stringify(newArticle),
-    }).then(() => {
+    try {
+      const response = await fetch(`https://blog.kata.academy/api/${editParams}`, {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${cookies.token}`,
+        },
+        body: JSON.stringify(newArticle),
+      });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+      const responseData = await response.json();
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       dispatch(getArticles([pagiPage, cookies.token]));
       nav('/');
-    });
+    } catch (e) {
+      console.log(e);
+    }
   };
+  const array = isEdit ? article.tagList : tags;
   return (
     <div className={'article__wrapper'}>
       <div className={'full__item'}>
@@ -125,7 +149,7 @@ const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
           </label>
           <label>
             Tags
-            {tags.map((item, index) => {
+            {array.map((item, index) => {
               return (
                 <label
                   key={index + Math.random()}

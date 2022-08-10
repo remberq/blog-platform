@@ -16,7 +16,6 @@ const ArticleList: React.FC = () => {
     });
     dispatch(addSingleArticle({ article }));
   };
-  console.log('not hi');
   return (
     <>
       <ul className={'article__wrapper'}>

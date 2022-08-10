@@ -37,13 +37,14 @@ const EditProfile = () => {
   const dispatch = useAppDispatch();
   const pagiPage = useAppSelector((state) => state.article.page);
   const [toggleVision, setToggleVision] = useState(false);
+  const [errorsData, setErrorsData] = useState<IFormInputEdit | null>(null);
   const nav = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<IFormInputEdit>({ resolver: yupResolver(schema) });
-  const onSubmit: SubmitHandler<IFormInputEdit> = (data) => {
+  const onSubmit: SubmitHandler<IFormInputEdit> = async (data) => {
     const keys = Object.keys(data);
     const resp = {};
     for (const item of keys) {
@@ -51,24 +52,30 @@ const EditProfile = () => {
         resp[item] = data[item];
       }
     }
-    fetch('https://blog.kata.academy/api/user', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${cookies.token}`,
-      },
-      body: JSON.stringify({ user: resp }),
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((request) => {
-        dispatch(setUserData(request));
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        dispatch(getArticles([pagiPage, cookies.token]));
-        nav('/');
+    try {
+      const response = await fetch('https://blog.kata.academy/api/user', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${cookies.token}`,
+        },
+        body: JSON.stringify({ user: resp }),
       });
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        setErrorsData(errorResponse.errors);
+        throw new Error('oops');
+      }
+      setErrorsData(null);
+      const editData = await response.json();
+      dispatch(setUserData(editData));
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      dispatch(getArticles([pagiPage, cookies.token]));
+      nav('/');
+    } catch (e) {
+      console.log(e);
+    }
   };
   return (
     <div className={'form__wrapper'}>
@@ -82,8 +89,9 @@ const EditProfile = () => {
             placeholder={authUser?.username || 'Username'}
             defaultValue={authUser?.username}
           />
-          {errors?.username ? <p className={'error__text'}>{errors.username.message}</p> : null}
         </label>
+        {errorsData?.username ? <p className={'error__text'}>{errorsData?.username}</p> : null}
+        {errors?.username ? <p className={'error__text'}>{errors.username.message}</p> : null}
         <label htmlFor="email">
           Email address
           <input
@@ -91,8 +99,9 @@ const EditProfile = () => {
             {...register('email', { required: true })}
             placeholder={authUser?.email || 'Email address'}
           />
-          {errors?.email ? <p className={'error__text'}>{errors.email.message}</p> : null}
         </label>
+        {errorsData?.email ? <p className={'error__text'}>{errorsData.email}</p> : null}
+        {errors?.email ? <p className={'error__text'}>{errors.email.message}</p> : null}
         <label className={'show-hide-password'} htmlFor="password">
           <img
             className={'show-pass'}
@@ -105,10 +114,12 @@ const EditProfile = () => {
             className={errors?.password ? 'failed-validation-input' : 'form__input'}
             {...register('password', { required: false })}
             placeholder={'Password'}
+            autoComplete={'off'}
             type={!toggleVision ? 'password' : ''}
           />
-          {errors?.password ? <p className={'error__text'}>{errors.password.message}</p> : null}
         </label>
+        {errorsData?.password ? <p className={'error__text'}>{errorsData?.password}</p> : null}
+        {errors?.password ? <p className={'error__text'}>{errors.password.message}</p> : null}
         <label htmlFor="repeat">
           Avatar image (url)
           <input
@@ -116,9 +127,10 @@ const EditProfile = () => {
             {...register('image')}
             placeholder={authUser?.image || 'Enter your Avatar URL'}
           />
-          {errors?.image ? <p className={'error__text'}>{errors.image.message}</p> : null}
         </label>
-        <input className={'form__submit-btn'} type="submit" value={'Save'} />
+        {errorsData?.image ? <p className={'error__text'}>{errorsData?.image}</p> : null}
+        {errors?.image ? <p className={'error__text'}>{errors.image.message}</p> : null}
+        <input className={`form__submit-btn ${errorsData && 'error'}`} type="submit" value={'Save'} />
       </form>
     </div>
   );

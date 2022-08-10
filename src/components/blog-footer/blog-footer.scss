@@ -1,8 +1,11 @@
+@import "src/components/variables";
+
 .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  max-width: 1440px;
   height: 80px;
   padding: 0 22px;
 
@@ -13,14 +16,6 @@
   background-color: white;
   box-shadow: 0 10px 20px rgba(222, 220, 220, 0.56);
 
-  .footer__title {
-
-    font-size: 18px;
-    line-height: 28px;
-
-    color: rgba(0, 0, 0, 0.85);
-  }
-
   .footer__authorization {
     display: flex;
     justify-content: space-evenly;
@@ -28,8 +23,37 @@
   }
 }
 
+.footer__title {
+  font-size: 18px;
+  line-height: 28px;
+  color: rgba(0, 0, 0, 0.85);
+  transition: all 0.2s;
+
+  .footer__title-f {
+    padding: 3px;
+    border-radius: 2px;
+    background-color: #1890FF;
+    color: white;
+
+
+  }
+
+  .footer__title-l {
+    padding: 3px;
+    border-radius: 2px;
+    background-color: white;
+    color: rgba(0, 0, 0, 0.85);
+  }
+  &:hover {
+    @include animation-max;
+  }
+  &:active {
+    @include animation-min;
+  }
+}
+
 .footer__link {
-  min-width: 110px;
+  width: 110px;
   height: 51px;
   padding: 10px;
 
@@ -49,7 +73,7 @@
     color: white;
   }
 
-  &:not(:last-child) {
+  &:first-child {
     margin-right: 10px;
   }
 }
@@ -109,13 +133,17 @@
   transition: border-color 1s, background-color 1s;
 
   &:hover {
-    background-color: #e8e3e3;
-    border: 1px solid black;
+    cursor: pointer;
+    @include animation-max;
+  }
+
+  &:active {
+    @include animation-min;
   }
 }
 
 .auth__link--logout {
-  padding: 10px;
+  padding: 1px 10px;
   background-color: white;
   border-radius: 4px;
   border: 1px solid black;

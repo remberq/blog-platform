@@ -1,10 +1,12 @@
+@import "src/components/variables";
+
 .article__item {
   position: relative;
   width: 100%;
   height: 180px;
   padding: 15px 19px;
   background-color: white;
-  border-radius: 2px;
+  border-radius: 6px;
   margin-top: 26px;
   margin-bottom: 26px;
   box-shadow: 0 10px 20px rgba(222, 220, 220, 0.56);
@@ -12,7 +14,6 @@
   font-family: 'Inter', sans-serif;
   font-style: normal;
   font-weight: 400;
-
 }
 
 .article__tags {
@@ -57,11 +58,17 @@
 
   .article__heading-text {
     margin-right: 13px;
-
     font-size: 20px;
     line-height: 28px;
-
     color: #1890FF;
+
+    &:hover {
+      color: #52C41A;
+      @include animation-max;
+    }
+    &:active {
+      @include animation-min;
+    }
   }
 
   p {
@@ -108,11 +115,7 @@
     }
 
     &:active {
-      transform: matrix3d(0.8,0,0.00,0,0.00,0.8,0.00,0,0,0,1,0,0,0,0,1);
-      transform-origin: center center 0;
-      transition: all 0.2s ease 0s;
-      -webkit-transform-origin: center center 0;
-      -webkit-transition: all 0.2s ease 0s;
+      @include animation-min;
     }
   }
 }
@@ -125,7 +128,7 @@
   height: 46px;
 
   .author__info {
-    width: 90px;
+    width: 182px;
     display: flex;
     flex-direction: column;
     margin-right: 12px;

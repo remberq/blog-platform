@@ -1,12 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import reducers from './articlesSlice';
-const { article, auth } = reducers;
+const { article, auth, mem } = reducers;
 
 export const store = configureStore({
   reducer: {
-    article: article,
-    auth: auth,
+    article,
+    auth,
+    mem,
   },
 });
 

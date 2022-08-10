@@ -6,8 +6,6 @@ import { useCookies } from 'react-cookie';
 import { useAppDispatch, useAppSelector } from '../../hook/hooks';
 import { setAuthUser, setUserData } from '../../store/articlesSlice';
 
-import avatar from './avatar.png';
-
 const UnAuthHeader: React.FC = () => {
   return (
     <div className={'footer__authorization'}>
@@ -31,7 +29,6 @@ const AuthHeader: React.FC = () => {
     dispatch(setUserData(null));
   };
 
-  console.log(authUser);
   useEffect(() => {
     fetch('https://blog.kata.academy/api/user', {
       method: 'GET',
@@ -50,7 +47,11 @@ const AuthHeader: React.FC = () => {
       </Link>
       <Link to={'/profile'} className={'footer__auth-profile'}>
         <span className={'auth__name'}>{authUser?.username}</span>
-        <img className={'auth__img'} src={authUser?.image || avatar} alt="avatar" />
+        <img
+          className={'auth__img'}
+          src={authUser?.image || 'https://static.productionready.io/images/smiley-cyrus.jpg'}
+          alt="avatar"
+        />
       </Link>
       <Link to={'/'} onClick={logOutHandle}>
         <button className={'auth__link--logout'}>Log Out</button>
@@ -64,7 +65,8 @@ const BlogHeader: React.FC = () => {
   return (
     <div className={'footer'}>
       <Link to={'/'} className={'footer__title'}>
-        FaceLook
+        <span className={'footer__title-f'}>Face</span>
+        <span className={'footer__title-l'}>Look</span>
       </Link>
       {!isAuth ? <UnAuthHeader /> : <AuthHeader />}
     </div>

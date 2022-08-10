@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import './newAccountRegister.scss';
 import { Link, useNavigate } from 'react-router-dom';
+
+import { useAppSelector } from '../../hook/hooks';
 
 import hide from './hidden.png';
 import view from './view.png';
@@ -40,12 +42,16 @@ const schema = yup
 const NewAccountRegister = () => {
   const [passVision, setPassVision] = useState(false);
   const [repeatVision, setRepeatVision] = useState(false);
+  const { isAuth } = useAppSelector((state) => state.auth);
   const nav = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<IFormInput>({ resolver: yupResolver(schema) });
+  useEffect(() => {
+    if (isAuth) nav('/');
+  }, [nav, isAuth]);
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
     const { username, password, email } = data;
     fetch('https://blog.kata.academy/api/users', {
@@ -76,8 +82,8 @@ const NewAccountRegister = () => {
             {...register('username')}
             placeholder={'Username'}
           />
-          {errors?.username ? <p className={'error__text'}>{errors.username.message}</p> : null}
         </label>
+        {errors?.username ? <p className={'error__text'}>{errors.username.message}</p> : null}
         <label htmlFor="email">
           Email address
           <input
@@ -85,8 +91,8 @@ const NewAccountRegister = () => {
             {...register('email')}
             placeholder={'Email address'}
           />
-          {errors?.email ? <p className={'error__text'}>{errors.email.message}</p> : null}
         </label>
+        {errors?.email ? <p className={'error__text'}>{errors.email.message}</p> : null}
         <label className={'show-hide-password'} htmlFor="password">
           <img
             className={'show-pass'}
@@ -99,10 +105,11 @@ const NewAccountRegister = () => {
             className={errors?.password ? 'failed-validation-input' : 'form__input'}
             {...register('password')}
             placeholder={'Password'}
+            autoComplete={'off'}
             type={!passVision ? 'password' : ''}
           />
-          {errors?.password ? <p className={'error__text'}>{errors.password.message}</p> : null}
         </label>
+        {errors?.password ? <p className={'error__text'}>{errors.password.message}</p> : null}
         <label className={'show-hide-password'} htmlFor="repeat">
           <img
             className={'show-pass'}
@@ -116,9 +123,10 @@ const NewAccountRegister = () => {
             {...register('repeat')}
             placeholder={'Repeat Password'}
             type={!repeatVision ? 'password' : ''}
+            autoComplete={'off'}
           />
-          {errors?.repeat ? <p className={'error__text'}>{errors.repeat.message}</p> : null}
         </label>
+        {errors?.repeat ? <p className={'error__text'}>{errors.repeat.message}</p> : null}
         <label className={'checked__input'} htmlFor={'agree'}>
           <input {...register('checkbox')} id={'agree'} type="checkbox" />I agree to the processing of my personal
           information

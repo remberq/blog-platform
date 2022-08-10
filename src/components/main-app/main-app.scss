@@ -1,9 +1,7 @@
+@import "src/components/variables";
+
 .main {
   background-color: #EBEEF3;
-}
-
-.container {
-
 }
 
 .container {
@@ -13,4 +11,19 @@
   width: 100%;
   height: 100%;
   padding-bottom: 20px;
+}
+
+.mem {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 80px;
+
+  &:hover {
+    cursor: pointer;
+    @include animation-max;
+  }
+  &:active {
+    @include animation-min;
+  }
 }

@@ -15,29 +15,29 @@ interface IArticleProps {
 
 const ArticleListItem: React.FC<IArticleProps> = ({ article, onClick }) => {
   const date = new DateMagic();
-  const pagiPage = useAppSelector((state) => state.article.page);
-  const isAuth = useAppSelector((state) => state.auth.isAuth);
-  const dispatch = useAppDispatch();
-  const [isLiked] = useState(article.favorited);
+  const { isAuth } = useAppSelector((state) => state.auth);
+  const [isLiked, setIsLiked] = useState(article.favorited);
+  const [likeCount, setLikeCount] = useState(article.favoritesCount);
   const [cookies] = useCookies(['token']);
-  console.log('hi');
   // like/unlike handle
-  const likeHandle = () => {
+  const likeHandle = async () => {
     const method = !isLiked ? 'POST' : 'DELETE';
-    fetch(`https://blog.kata.academy/api/articles/${article.slug}/favorite`, {
-      method,
-      headers: {
-        Authorization: `Bearer ${cookies.token}`,
-      },
-    })
-      .then((resp) => {
-        return resp.json();
-      })
-      .then(() => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        dispatch(getArticles([pagiPage, cookies.token]));
+    try {
+      const response = await fetch(`https://blog.kata.academy/api/articles/${article.slug}/favorite`, {
+        method,
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
       });
+      if (!response.ok) {
+        throw new Error();
+      }
+      if (!isLiked) setLikeCount((count) => ++count);
+      else setLikeCount((count) => --count);
+      setIsLiked((like) => !like);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -68,7 +68,7 @@ const ArticleListItem: React.FC<IArticleProps> = ({ article, onClick }) => {
               stroke="rgba(0, 0, 0, 0.75)"
             />
           </svg>
-          <span className={'likes__count'}>{article.favoritesCount}</span>
+          <span className={'likes__count'}>{likeCount}</span>
         </div>
       </div>
       <div className={'tags__wrapper'}>

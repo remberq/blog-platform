@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
 import * as yup from 'yup';
 import '../newAccountRegister/newAccountRegister.scss';
+import './login.scss';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 
@@ -30,6 +31,7 @@ const schema = yup
 const Login = () => {
   const [cookies, setCookies] = useCookies(['token']);
   const [toggleVision, setToggleVision] = useState(false);
+  const [error, setError] = useState(false);
   const { isAuth } = useAppSelector((state) => state.auth);
   const nav = useNavigate();
   const dispatch = useAppDispatch();
@@ -41,26 +43,32 @@ const Login = () => {
   useEffect(() => {
     if (isAuth) nav('/');
   }, [nav, isAuth]);
-  const onSubmitLogin = (data) => {
-    fetch('https://blog.kata.academy/api/users/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user: data,
-      }),
-    })
-      .then((val) => val.json())
-      .then((item) => {
-        setCookies('token', item.user.token, {
-          maxAge: 7200,
-        });
-      })
-      .then(() => {
-        dispatch(setAuthUser(true));
-        nav('/profile');
+  const onSubmitLogin = async (data) => {
+    try {
+      const response = await fetch('https://blog.kata.academy/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user: data,
+        }),
       });
+      if (!response.ok) {
+        const err = await response.json();
+        throw err.errors;
+      }
+      const loginData = await response.json();
+      setCookies('token', loginData.user.token, {
+        maxAge: 7200,
+      });
+      setError(false);
+      dispatch(setAuthUser(true));
+      nav('/profile');
+    } catch (e) {
+      setError(true);
+      console.log(e);
+    }
   };
 
   return (
@@ -75,8 +83,8 @@ const Login = () => {
             {...register('email')}
             placeholder={'Email address'}
           />
-          {errors?.email ? <p className={'error__text'}>{errors.email.message}</p> : null}
         </label>
+        {errors?.email ? <p className={'error__text'}>{errors.email.message}</p> : null}
         <label className={'show-hide-password'} htmlFor="password">
           <img
             className={'show-pass'}
@@ -89,11 +97,13 @@ const Login = () => {
             className={errors?.password ? 'failed-validation-input' : 'form__input'}
             {...register('password')}
             placeholder={'Password'}
-            type={!toggleVision ? 'password' : ''}
+            autoComplete={'off'}
+            type={!toggleVision ? 'password' : 'text'}
           />
-          {errors?.password ? <p className={'error__text'}>{errors.password.message}</p> : null}
         </label>
-        <input className={'form__submit-btn'} type="submit" value={'Login'} />
+        {errors?.password ? <p className={'error__text'}>{errors.password.message}</p> : null}
+        {error ? <p className={'error__text'}>Email or Password is invalid</p> : null}
+        <input className={`form__submit-btn ${error && 'error'}`} type="submit" value={'Login'} />
         <p className={'form__signin-text'}>
           Already have an account? <Link to={'/sign-up'}>Sign Up.</Link>
         </p>

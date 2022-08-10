@@ -1,0 +1,33 @@
+.mem-container {
+  position: fixed;
+  width: 300px;
+  right: -350px;
+  bottom: 150px;
+  border: 2px solid #8C8C8C;
+  background-color: white;
+  z-index: 2;
+  border-radius: 10px;
+  padding-top: 10px;
+  padding-bottom: 50px;
+  transition: transform 0.3s;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 28px;
+
+  color: rgba(0, 0, 0, 0.85);
+
+}
+
+.hide {
+  transform: translateX(-370px);
+}
+
+.cats {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+}

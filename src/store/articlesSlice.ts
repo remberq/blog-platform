@@ -61,7 +61,7 @@ export const articleSlice = createSlice({
   name: 'article',
   initialState,
   reducers: {
-    addSingleArticle: (state, action) => {
+    addSingleArticle: (state: IArticles, action) => {
       state.singleArticle = action.payload.article;
     },
     pagePaginationSet: (state: IArticles, { payload }) => {
@@ -108,11 +108,25 @@ export const authSlice = createSlice({
   },
 });
 
+export const memSlice = createSlice({
+  name: 'mem',
+  initialState: {
+    isMemTime: false,
+  },
+  reducers: {
+    memToggle: (state) => {
+      state.isMemTime = !state.isMemTime;
+    },
+  },
+});
+
 const reducers = {
   article: articleSlice.reducer,
   auth: authSlice.reducer,
+  mem: memSlice.reducer,
 };
 
 export const { addSingleArticle, pagePaginationSet } = articleSlice.actions;
 export const { setAuthUser, setUserData } = authSlice.actions;
+export const { memToggle } = memSlice.actions;
 export default reducers;
