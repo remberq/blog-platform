@@ -4,7 +4,8 @@ import './blog-footer.scss';
 import { useCookies } from 'react-cookie';
 
 import { useAppDispatch, useAppSelector } from '../../hook/hooks';
-import { setAuthUser, setUserData } from '../../store/articlesSlice';
+import { setAuthUser, setUserData } from '../../store/blog-slices';
+import { getCurrentUser } from '../../store/actions';
 
 const UnAuthHeader: React.FC = () => {
   return (
@@ -30,15 +31,8 @@ const AuthHeader: React.FC = () => {
   };
 
   useEffect(() => {
-    fetch('https://blog.kata.academy/api/user', {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${cookies.token}`,
-      },
-    })
-      .then((resp) => resp.json())
-      .then((val) => dispatch(setUserData(val)));
-  }, [dispatch, cookies]);
+    dispatch(getCurrentUser(cookies.token));
+  }, [dispatch, cookies, authUser]);
 
   return (
     <div className={'footer__auth'}>

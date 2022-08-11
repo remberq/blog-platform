@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 
-import reducers from './articlesSlice';
+import reducers from './blog-slices';
 const { article, auth, mem } = reducers;
 
 export const store = configureStore({

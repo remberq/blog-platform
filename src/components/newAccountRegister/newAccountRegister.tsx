@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import './newAccountRegister.scss';
 import { Link, useNavigate } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 
-import { useAppSelector } from '../../hook/hooks';
+import { useAppDispatch, useAppSelector } from '../../hook/hooks';
+import { newAccountSchema } from '../form-schemas';
+import { addNewUser } from '../../store/actions';
+import { setAuthUser } from '../../store/blog-slices';
 
 import hide from './hidden.png';
 import view from './view.png';
@@ -18,56 +21,31 @@ interface IFormInput {
   checkbox: boolean;
 }
 
-const schema = yup
-  .object({
-    username: yup
-      .string()
-      .min(3, 'Username needs to be at least 3 characters')
-      .max(20, 'Username needs to be at max 20 characters')
-      .required('Username is required field!'),
-    email: yup.string().email('Email should be a valid!').required('Email is required field!'),
-    password: yup
-      .string()
-      .min(6, 'Your password needs to be at least 6 characters.')
-      .max(40, 'Your password needs to be at max 40 characters.')
-      .required('Password is required field!'),
-    repeat: yup
-      .string()
-      .required('Please, repeat the password!')
-      .oneOf([yup.ref('password')], 'Passwords must match'),
-    checkbox: yup.boolean().required('Accept your agree').oneOf([true], 'Accept your agree'),
-  })
-  .required();
-
 const NewAccountRegister = () => {
   const [passVision, setPassVision] = useState(false);
   const [repeatVision, setRepeatVision] = useState(false);
   const { isAuth } = useAppSelector((state) => state.auth);
+  const [cookies, setCookies] = useCookies(['token']);
+  const dispatch = useAppDispatch();
   const nav = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IFormInput>({ resolver: yupResolver(schema) });
+  } = useForm<IFormInput>({ resolver: yupResolver(newAccountSchema) });
   useEffect(() => {
     if (isAuth) nav('/');
   }, [nav, isAuth]);
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
-    const { username, password, email } = data;
-    fetch('https://blog.kata.academy/api/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user: {
-          username,
-          password,
-          email,
-        },
-      }),
-    });
-    nav('/profile');
+    dispatch(addNewUser(data))
+      .then((userData) => {
+        const token = userData.payload.token;
+        setCookies('token', token, {
+          maxAge: 7200,
+        });
+        dispatch(setAuthUser(true));
+      })
+      .then(() => nav('/profile'));
   };
 
   return (

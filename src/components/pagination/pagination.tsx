@@ -5,7 +5,8 @@ import { useCookies } from 'react-cookie';
 import './pagination.scss';
 
 import { useAppDispatch, useAppSelector } from '../../hook/hooks';
-import { getArticles, pagePaginationSet } from '../../store/articlesSlice';
+import { pagePaginationSet } from '../../store/blog-slices';
+import { getArticles } from '../../store/actions';
 
 const Pagination: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -13,8 +14,6 @@ const Pagination: React.FC = () => {
   const pagiPage = useAppSelector((state) => state.article.page);
   const changeHandler = (page: number) => {
     dispatch(pagePaginationSet(page));
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     dispatch(getArticles([page, cookies.token]));
   };
   return (

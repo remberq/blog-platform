@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import ArticleListItem from '../article-ilist-item/article-list-item';
 import './article-list.scss';
 import { useAppSelector, useAppDispatch } from '../../hook/hooks';
-import { addSingleArticle, IArticlesData } from '../../store/articlesSlice';
+import { addSingleArticle, IArticlesData } from '../../store/blog-slices';
 import Pagination from '../pagination/pagination';
 
 const ArticleList: React.FC = () => {

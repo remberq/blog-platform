@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
-import * as yup from 'yup';
 import '../newAccountRegister/newAccountRegister.scss';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 
 import { useAppDispatch, useAppSelector } from '../../hook/hooks';
-import { getArticles, setUserData } from '../../store/articlesSlice';
+import { setUserData } from '../../store/blog-slices';
+import { getArticles } from '../../store/actions';
 import hide from '../newAccountRegister/hidden.png';
 import view from '../newAccountRegister/view.png';
+import { editProfileSchema } from '../form-schemas';
+import ApiResponses from '../apiResponses';
 
 interface IFormInputEdit {
   username?: string;
@@ -17,19 +19,6 @@ interface IFormInputEdit {
   password?: string;
   image: string;
 }
-
-const schema = yup
-  .object({
-    username: yup
-      .string()
-      .min(3, 'Username needs to be at least 3 characters')
-      .max(20, 'Username needs to be at max 20 characters')
-      .required('Should not be empty'),
-    email: yup.string().email('Email should be a valid!'),
-    password: yup.string(),
-    image: yup.string(),
-  })
-  .required();
 
 const EditProfile = () => {
   const { authUser } = useAppSelector((state) => state.auth);
@@ -43,8 +32,9 @@ const EditProfile = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IFormInputEdit>({ resolver: yupResolver(schema) });
-  const onSubmit: SubmitHandler<IFormInputEdit> = async (data) => {
+  } = useForm<IFormInputEdit>({ resolver: yupResolver(editProfileSchema) });
+  const apiEdit = new ApiResponses();
+  const onSubmit: SubmitHandler<IFormInputEdit> = (data) => {
     const keys = Object.keys(data);
     const resp = {};
     for (const item of keys) {
@@ -52,30 +42,16 @@ const EditProfile = () => {
         resp[item] = data[item];
       }
     }
-    try {
-      const response = await fetch('https://blog.kata.academy/api/user', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${cookies.token}`,
-        },
-        body: JSON.stringify({ user: resp }),
-      });
-      if (!response.ok) {
-        const errorResponse = await response.json();
-        setErrorsData(errorResponse.errors);
-        throw new Error('oops');
+    apiEdit.submitNewProfileData(cookies.token, resp).then((value) => {
+      if (value.errors) {
+        setErrorsData(value.errors);
+      } else {
+        setErrorsData(null);
+        dispatch(setUserData(value));
+        dispatch(getArticles([pagiPage, cookies.token]));
+        nav('/');
       }
-      setErrorsData(null);
-      const editData = await response.json();
-      dispatch(setUserData(editData));
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      dispatch(getArticles([pagiPage, cookies.token]));
-      nav('/');
-    } catch (e) {
-      console.log(e);
-    }
+    });
   };
   return (
     <div className={'form__wrapper'}>

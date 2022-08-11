@@ -7,7 +7,8 @@ import ArticleList from '../acticle-list/article-list';
 import BlogHeader from '../blog-footer/blog-footer';
 import './main-app.scss';
 import '../full-article-item/full-article-item.scss';
-import { getArticles, setAuthUser, memToggle } from '../../store/articlesSlice';
+import { setAuthUser, memToggle } from '../../store/blog-slices';
+import { getArticles } from '../../store/actions';
 import FullArticleItem from '../full-article-item/full-article-item';
 import NewAccountRegister from '../newAccountRegister/newAccountRegister';
 import Login from '../login/login';
@@ -25,8 +26,6 @@ const MainApp: React.FC = () => {
 
   useEffect(() => {
     if (cookies.token) dispatch(setAuthUser(true));
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     dispatch(getArticles([pagiPage, cookies.token]));
   }, [dispatch, cookies, pagiPage]);
 

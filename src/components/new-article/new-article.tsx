@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import * as yup from 'yup';
+import React, { useEffect, useMemo, useState } from 'react';
 import './new-article.scss';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
@@ -7,29 +6,16 @@ import { useCookies } from 'react-cookie';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAppDispatch, useAppSelector } from '../../hook/hooks';
-import { addSingleArticle, getArticles } from '../../store/articlesSlice';
+import { addSingleArticle } from '../../store/blog-slices';
+import { getArticles } from '../../store/actions';
+import { newArticleSchema } from '../form-schemas';
+import ApiResponses from '../apiResponses';
 
 interface INewArticleInput {
   title: string;
   description: string;
   body: string;
 }
-
-const schema = yup
-  .object({
-    title: yup
-      .string()
-      .min(3, 'Title needs to be at least 3 characters')
-      .max(20, 'Title needs to be at max 20 characters')
-      .required('Should not be empty'),
-    description: yup
-      .string()
-      .min(3, 'Short description needs to be at least 3 characters')
-      .max(40, 'Short description needs to be at max 40 characters')
-      .required(),
-    body: yup.string().required('Text should not be empty!'),
-  })
-  .required();
 
 type TTags = string[];
 type TValue = string;
@@ -45,26 +31,22 @@ const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
   const [value, setValue] = useState<TValue>('');
   const [tagError, setTagError] = useState(false);
   const [cookies] = useCookies(['token']);
+  const api = useMemo(() => new ApiResponses(), []);
   const dispatch = useAppDispatch();
   const nav = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<INewArticleInput>({ resolver: yupResolver(schema) });
+  } = useForm<INewArticleInput>({ resolver: yupResolver(newArticleSchema) });
   const { slug } = useParams();
   useEffect(() => {
     if (isEdit) {
-      fetch(`https://blog.kata.academy/api/articles/${slug}`)
-        .then((val) => {
-          return val.json();
-        })
-        .then((item) => {
-          console.log(item, 'ITEM');
-          dispatch(addSingleArticle({ article: item.article }));
-        });
+      api.getCurrentArticle(slug).then((item) => {
+        dispatch(addSingleArticle({ article: item.article }));
+      });
     }
-  }, [dispatch, slug, isEdit]);
+  }, [dispatch, slug, isEdit, api]);
 
   if (isEdit && !Object.keys(article).length) {
     return <div>loading</div>;
@@ -81,7 +63,7 @@ const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
     }
   };
   // onFormSubmit
-  const onSubmit: SubmitHandler<INewArticleInput> = async (data) => {
+  const onSubmit: SubmitHandler<INewArticleInput> = (data) => {
     const newArticle = {
       article: {
         ...data,
@@ -89,29 +71,12 @@ const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
       },
     };
     const editParams = isEdit ? `articles/${article.slug}` : 'articles';
-    try {
-      const response = await fetch(`https://blog.kata.academy/api/${editParams}`, {
-        method: isEdit ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${cookies.token}`,
-        },
-        body: JSON.stringify(newArticle),
-      });
-
-      if (!response.ok) {
-        throw new Error();
-      }
-      const responseData = await response.json();
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+    const method = isEdit ? 'PUT' : 'POST';
+    api.addNewArticle(editParams, cookies.token, newArticle, method).then(() => {
       dispatch(getArticles([pagiPage, cookies.token]));
       nav('/');
-    } catch (e) {
-      console.log(e);
-    }
+    });
   };
-  const array = isEdit ? article.tagList : tags;
   return (
     <div className={'article__wrapper'}>
       <div className={'full__item'}>
@@ -149,7 +114,7 @@ const NewArticle: React.FC<IEditArticle> = ({ isEdit }) => {
           </label>
           <label>
             Tags
-            {array.map((item, index) => {
+            {tags.map((item, index) => {
               return (
                 <label
                   key={index + Math.random()}

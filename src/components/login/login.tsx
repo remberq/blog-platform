@@ -1,32 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup';
-import * as yup from 'yup';
 import '../newAccountRegister/newAccountRegister.scss';
 import './login.scss';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 
 import { useAppDispatch, useAppSelector } from '../../hook/hooks';
-import { setAuthUser } from '../../store/articlesSlice';
+import { setAuthUser } from '../../store/blog-slices';
 import hide from '../newAccountRegister/hidden.png';
 import view from '../newAccountRegister/view.png';
+import { loginSchema } from '../form-schemas';
+import ApiResponses from '../apiResponses';
 
 interface IFormInputSignIn {
   email: string;
   password: string;
 }
-
-const schema = yup
-  .object({
-    email: yup.string().email('Email should be a valid!').required('Email is required field!'),
-    password: yup
-      .string()
-      .min(6, 'Your password needs to be at least 6 characters.')
-      .max(40, 'Your password needs to be at max 40 characters.')
-      .required('Password is required field!'),
-  })
-  .required();
 
 const Login = () => {
   const [cookies, setCookies] = useCookies(['token']);
@@ -35,40 +25,27 @@ const Login = () => {
   const { isAuth } = useAppSelector((state) => state.auth);
   const nav = useNavigate();
   const dispatch = useAppDispatch();
+  const api = new ApiResponses();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IFormInputSignIn>({ resolver: yupResolver(schema) });
+  } = useForm<IFormInputSignIn>({ resolver: yupResolver(loginSchema) });
   useEffect(() => {
     if (isAuth) nav('/');
   }, [nav, isAuth]);
-  const onSubmitLogin = async (data) => {
-    try {
-      const response = await fetch('https://blog.kata.academy/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user: data,
-        }),
-      });
-      if (!response.ok) {
-        const err = await response.json();
-        throw err.errors;
+  const onSubmitLogin = (data) => {
+    api.loginUser(data).then((userData) => {
+      if (!userData) setError(true);
+      else {
+        setCookies('token', userData.user.token, {
+          maxAge: 7200,
+        });
+        setError(false);
+        dispatch(setAuthUser(true));
+        nav('/profile');
       }
-      const loginData = await response.json();
-      setCookies('token', loginData.user.token, {
-        maxAge: 7200,
-      });
-      setError(false);
-      dispatch(setAuthUser(true));
-      nav('/profile');
-    } catch (e) {
-      setError(true);
-      console.log(e);
-    }
+    });
   };
 
   return (

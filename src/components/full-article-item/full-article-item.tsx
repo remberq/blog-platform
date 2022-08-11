@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import './full-article-item.scss';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -8,7 +8,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { useAppDispatch, useAppSelector } from '../../hook/hooks';
 import { DateMagic } from '../article-ilist-item/dateLogic';
-import { addSingleArticle, getArticles } from '../../store/articlesSlice';
+import { addSingleArticle } from '../../store/blog-slices';
+import { getArticles } from '../../store/actions';
+import ApiResponses from '../apiResponses';
 
 import logo from './arrow.png';
 
@@ -23,27 +25,17 @@ const FullArticleItem: React.FC = () => {
   const dispatch = useAppDispatch();
   const nav = useNavigate();
   const { slug } = useParams();
+  const api = useMemo(() => new ApiResponses(), []);
   useEffect(() => {
-    fetch(`https://blog.kata.academy/api/articles/${slug}`)
-      .then((val) => {
-        return val.json();
-      })
-      .then((item) => {
-        dispatch(addSingleArticle({ article: item.article }));
-      });
-  }, [dispatch, slug]);
+    api.getCurrentArticle(slug).then((item) => {
+      dispatch(addSingleArticle({ article: item.article }));
+    });
+  }, [dispatch, slug, api]);
 
   // delete article
   const deleteArticleHandle = (e) => {
     e.stopPropagation();
-    fetch(`https://blog.kata.academy/api/articles/${article?.slug}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${cookies.token}`,
-      },
-    }).then(() => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+    api.deleteCurrentArticle(slug, cookies.token).then(() => {
       dispatch(getArticles([pagiPage, cookies.token]));
       setIsDelete(false);
       nav('/');

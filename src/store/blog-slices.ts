@@ -1,6 +1,8 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
-interface IArticleAuthor {
+import { addNewUser, getArticles, getCurrentUser } from './actions';
+
+export interface IArticleAuthor {
   username: string;
   image: string;
   following: boolean;
@@ -19,37 +21,16 @@ export interface IArticlesData {
   title: string;
 }
 
-interface IResponseArticle {
+export interface IResponseArticle {
   articles: IArticlesData[];
   articlesCount: number;
 }
 
-interface IArticles {
+export interface IArticles {
   articles: IArticlesData[] | [];
   singleArticle: IArticlesData | Record<string, any>;
   page: number;
 }
-
-export const getArticles = createAsyncThunk('article/getArticles', async function (arg) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  try {
-    const indexOffset = arg[0] - 1;
-    const offset = [0, 6, 12, 18, 24];
-    const response = await fetch(`https://blog.kata.academy/api/articles?limit=6&offset=${offset[indexOffset]}`, {
-      headers: {
-        Authorization: `Bearer ${arg[1]}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error('Oh Hi Mark!');
-    }
-    const resJSON: IResponseArticle = await response.json();
-    return resJSON.articles;
-  } catch (e) {
-    console.log(e, 'OOOps');
-  }
-});
 
 const initialState: IArticles = {
   articles: [],
@@ -76,7 +57,7 @@ export const articleSlice = createSlice({
   },
 });
 
-interface IUser {
+export interface IUser {
   email: string;
   token: null;
   username: string;
@@ -105,6 +86,15 @@ export const authSlice = createSlice({
     clearUserData: (state) => {
       state.authUser = null;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getCurrentUser.fulfilled, (state: IUser | any, action) => {
+        state.authUser = { ...action.payload, token: null };
+      })
+      .addCase(addNewUser.fulfilled, (state: IUser | any, action) => {
+        state.authUser = { ...action.payload, token: null };
+      });
   },
 });
 

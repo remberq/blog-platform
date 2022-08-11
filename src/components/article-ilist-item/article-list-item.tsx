@@ -4,8 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 
-import { useAppDispatch, useAppSelector } from '../../hook/hooks';
-import { getArticles, IArticlesData } from '../../store/articlesSlice';
+import { useAppSelector } from '../../hook/hooks';
+import { IArticlesData } from '../../store/blog-slices';
+import ApiResponses from '../apiResponses';
 
 import { DateMagic } from './dateLogic';
 interface IArticleProps {
@@ -20,24 +21,17 @@ const ArticleListItem: React.FC<IArticleProps> = ({ article, onClick }) => {
   const [likeCount, setLikeCount] = useState(article.favoritesCount);
   const [cookies] = useCookies(['token']);
   // like/unlike handle
-  const likeHandle = async () => {
+  const likeHandle = () => {
+    const apiLike = new ApiResponses();
     const method = !isLiked ? 'POST' : 'DELETE';
-    try {
-      const response = await fetch(`https://blog.kata.academy/api/articles/${article.slug}/favorite`, {
-        method,
-        headers: {
-          Authorization: `Bearer ${cookies.token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error();
-      }
-      if (!isLiked) setLikeCount((count) => ++count);
-      else setLikeCount((count) => --count);
-      setIsLiked((like) => !like);
-    } catch (e) {
-      console.log(e);
-    }
+    apiLike
+      .articleLike(article.slug, cookies.token, method)
+      .then(() => {
+        if (!isLiked) setLikeCount((count) => ++count);
+        else setLikeCount((count) => --count);
+        setIsLiked((like) => !like);
+      })
+      .catch((e) => console.log(e));
   };
 
   return (
