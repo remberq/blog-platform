@@ -25,7 +25,7 @@ const schema = yup
       .min(3, 'Username needs to be at least 3 characters')
       .max(20, 'Username needs to be at max 20 characters')
       .required(),
-    email: yup.string().email('Email should be a valid!'),
+    email: yup.string().email('Email should be a valid!').required(),
     password: yup
       .string()
       .min(6, 'Your password needs to be at least 6 characters.')
