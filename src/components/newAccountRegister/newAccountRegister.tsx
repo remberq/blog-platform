@@ -24,8 +24,8 @@ const schema = yup
       .string()
       .min(3, 'Username needs to be at least 3 characters')
       .max(20, 'Username needs to be at max 20 characters')
-      .required(),
-    email: yup.string().email('Email should be a valid!').required(),
+      .required('Username is required field!'),
+    email: yup.string().email('Email should be a valid!').required('Email is required field!'),
     password: yup
       .string()
       .min(6, 'Your password needs to be at least 6 characters.')
@@ -35,7 +35,7 @@ const schema = yup
       .string()
       .required('Please, repeat the password!')
       .oneOf([yup.ref('password')], 'Passwords must match'),
-    checkbox: yup.boolean().required().oneOf([true], 'Accept your agree'),
+    checkbox: yup.boolean().required('Accept your agree').oneOf([true], 'Accept your agree'),
   })
   .required();
 

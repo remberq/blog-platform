@@ -19,7 +19,7 @@ interface IFormInputSignIn {
 
 const schema = yup
   .object({
-    email: yup.string().email('Email should be a valid!'),
+    email: yup.string().email('Email should be a valid!').required('Email is required field!'),
     password: yup
       .string()
       .min(6, 'Your password needs to be at least 6 characters.')
